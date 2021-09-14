@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Aplicações Shiny</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Nathália Campos" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Aplicações Shiny
+### Nathália Campos
+### 4intelligence
+### 16/03/2020
+
+---
+
+class: center, middle
+
+![](www/img/4i_azul.png) 
+
+---
+class: inverse, center, middle
+
+# Get Start
+
+---
+class: inverse
+
+# Criando um projeto em Shiny
+
+Para criar um projeto: `File -&gt; New Project -&gt; New Directory -&gt; Shiny Web Aplication`
+
+Na pasta do projeto terá:
+- Um script app.R
+- Uma pasta www
+- Um arquivo Rproj
+
+O arquivo Rproj contém informações de projeto para personalizar o comportamento do RStudio, como carregar configurações do RStudio, restaurar documentos de origem editados anteriormente, carregar o arquivo .RHistory e .RData no diretório do projeto. 
+
+O script 'app.R' é onde colocamos a base da aplicação e este pode ser separado em 3 arquivos: 'global.R', 'ui.R' e 'server.R'. 
+
+---
+class: inverse, center, middle
+
+# Desing Pattern Shiny R 
+
+---
+class: inverse
+
+# Estruturação das Pastas
+
+Pastas: 
+- www: imagens, bases de dados e arquivos css
+- modules: módulos do projeto, cada script com a parte ui e server junto
+- functions: funções usadas no projeto
+
+Scripts:
+- global.R: carregar pacotes e scripts
+- ui.R: código ui
+- server.R: código server
+
+```
+project_name/
+- www/
+- modules/
+- functions/
+- global.R
+- server.R
+- ui.R
+- project_name.Rproj
+```
+
+---
+class: inverse
+
+# Módularização 
+
+Consiste em separar os códigos em módulos. 
+
+Com esse padrão, você tem:
+- Modularidade
+- Namespaces distintos para cada instância (encapsulamento)
+- Reutilização
+
+Links: 
+[The Shiny Module Design Pattern](https://drdoane.com/the-shiny-module-design-pattern/)
+
+---
+class: inverse
+
+# Códigos
+
+Cada módulo possui uma função com o conteúdo do UI e outra do server. Neste caso vamos criar um script 'mod_teste.R' dentro da pasta 'module'.  
+
+```
+# UI Module
+mod_teste_ui &lt;- function(id){
+  ns(id)
+}
+
+# Server Module
+mod_teste &lt;- function(input, session, output){
+
+}
+
+```
+
+
+
+--
+
+No arquivo app.R (ou ui.R, server.R e global.R): 
+
+```
+# Loading
+source('modules/mod_teste.R')
+
+# UI Module
+mod_teste_ui('mod_teste_1')
+
+# Server Module
+callModule(mod_teste, 'mod_teste_1')
+```
+
+---
+class: inverse
+
+# Namespace
+
+Vários pacotes possuem nomes de funções iguais e isso pode causar conflito nos códigos. 
+
+Por isso é importante, ao chamar uma função, usar o namespace do pacote.  
+
+```
+pacote::função()
+```
+
+--
+
+Por exemplo, os pacotes 'dplyr' e 'plyr' possuem algumas funções com o mesmo nome, e quando não especificado o pacote, pode ocorrer do R escolher sozinho o pacote, escolher o errado e retornar um erro. 
+
+Quando carregamos os pacotes, é retornado alguns warnings dizendo as funções de outros pacotes que já foram carregadas. 
+
+```
+library(dplyr)
+library(plyr)
+
+# Attaching package: ‘plyr’
+# The following objects are masked from ‘package:dplyr’:
+#    arrange, count, desc, failwith, id, mutate, rename,
+#    summarise, summarize
+```
+
+---
+class: inverse
+
+# Namespace
+
+Sem usar namespace, o R interpreta a função 'rename' como do pacote 'plyr': 
+
+```
+mtcars %&gt;% rename(mpg2 = mpg)
+# Error in rename(., new_col = mpg) : unused argument (new_col = mpg)
+```
+--
+
+Como queremos usar a função 'rename' do pacote 'dplyr', é necessário passar o namespace: 
+
+```
+mtcars %&gt;% dplyr::rename(mpg2 = mpg)
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

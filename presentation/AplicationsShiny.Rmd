@@ -1,0 +1,172 @@
+---
+title: "Aplicações Shiny"
+author: "Nathália Campos"
+institute: "4intelligence"
+date: "16/03/2020"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: center, middle
+
+![](www/img/4i_azul.png) 
+
+---
+class: inverse, center, middle
+
+# Get Start
+
+---
+class: inverse
+
+# Criando um projeto em Shiny
+
+Para criar um projeto: `File -> New Project -> New Directory -> Shiny Web Aplication`
+
+Na pasta do projeto terá:
+- Um script app.R
+- Uma pasta www
+- Um arquivo Rproj
+
+O arquivo Rproj contém informações de projeto para personalizar o comportamento do RStudio, como carregar configurações do RStudio, restaurar documentos de origem editados anteriormente, carregar o arquivo .RHistory e .RData no diretório do projeto. 
+
+O script 'app.R' é onde colocamos a base da aplicação e este pode ser separado em 3 arquivos: 'global.R', 'ui.R' e 'server.R'. 
+
+---
+class: inverse, center, middle
+
+# Desing Pattern Shiny R 
+
+---
+class: inverse
+
+# Estruturação das Pastas
+
+Pastas: 
+- www: imagens, bases de dados e arquivos css
+- modules: módulos do projeto, cada script com a parte ui e server junto
+- functions: funções usadas no projeto
+
+Scripts:
+- global.R: carregar pacotes e scripts
+- ui.R: código ui
+- server.R: código server
+
+```
+project_name/
+- www/
+- modules/
+- functions/
+- global.R
+- server.R
+- ui.R
+- project_name.Rproj
+```
+
+---
+class: inverse
+
+# Módularização 
+
+Consiste em separar os códigos em módulos. 
+
+Com esse padrão, você tem:
+- Modularidade
+- Namespaces distintos para cada instância (encapsulamento)
+- Reutilização
+
+Links: 
+[The Shiny Module Design Pattern](https://drdoane.com/the-shiny-module-design-pattern/)
+
+---
+class: inverse
+
+# Códigos
+
+Cada módulo possui uma função com o conteúdo do UI e outra do server. Neste caso vamos criar um script 'mod_teste.R' dentro da pasta 'module'.  
+
+```
+# UI Module
+mod_teste_ui <- function(id){
+  ns(id)
+}
+
+# Server Module
+mod_teste <- function(input, session, output){
+
+}
+
+```
+
+
+
+--
+
+No arquivo app.R (ou ui.R, server.R e global.R): 
+
+```
+# Loading
+source('modules/mod_teste.R')
+
+# UI Module
+mod_teste_ui('mod_teste_1')
+
+# Server Module
+callModule(mod_teste, 'mod_teste_1')
+```
+
+---
+class: inverse
+
+# Namespace
+
+Vários pacotes possuem nomes de funções iguais e isso pode causar conflito nos códigos. 
+
+Por isso é importante, ao chamar uma função, usar o namespace do pacote.  
+
+```
+pacote::função()
+```
+
+--
+
+Por exemplo, os pacotes 'dplyr' e 'plyr' possuem algumas funções com o mesmo nome, e quando não especificado o pacote, pode ocorrer do R escolher sozinho o pacote, escolher o errado e retornar um erro. 
+
+Quando carregamos os pacotes, é retornado alguns warnings dizendo as funções de outros pacotes que já foram carregadas. 
+
+```
+library(dplyr)
+library(plyr)
+
+# Attaching package: ‘plyr’
+# The following objects are masked from ‘package:dplyr’:
+#    arrange, count, desc, failwith, id, mutate, rename,
+#    summarise, summarize
+```
+
+---
+class: inverse
+
+# Namespace
+
+Sem usar namespace, o R interpreta a função 'rename' como do pacote 'plyr': 
+
+```
+mtcars %>% rename(mpg2 = mpg)
+# Error in rename(., new_col = mpg) : unused argument (new_col = mpg)
+```
+--
+
+Como queremos usar a função 'rename' do pacote 'dplyr', é necessário passar o namespace: 
+
+```
+mtcars %>% dplyr::rename(mpg2 = mpg)
+```
+
+
+
+
